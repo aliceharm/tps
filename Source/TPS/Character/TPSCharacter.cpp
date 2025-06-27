@@ -103,6 +103,7 @@ void ATPSCharacter::Tick(float DeltaSeconds)
 			CursorToWorld->SetWorldRotation(CursorR);
 		}
 	}
+
 	MovementTick(DeltaSeconds);
 }
 
