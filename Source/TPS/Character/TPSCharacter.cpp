@@ -148,25 +148,20 @@ void ATPSCharacter::MovementTick(float DeltaTime)
 
 	AddMovementInput(DirectionForward, AxisX);
 	AddMovementInput(DirectionRight, AxisY);
-	
-	if (MovementState == EMovementState::SprintRun_State)
-	{
-		FVector myRotationVector = GetVelocity();
-		FRotator myRotator = myRotationVector.ToOrientationRotator();
-		SetActorRotation((FQuat(myRotator)));
+
+	// Получаем вектор текущего направления движения персонажа
+	FVector CurrentDirection = GetVelocity().GetSafeNormal(); // Нормализуем скорость для определения направления
+
+	// Проверяем угол между направлением движения и направлением взгляда камеры
+	float DotProduct = FVector::DotProduct(CurrentDirection, DirectionForward);
+
+	bool IsRunningForward = (DotProduct > 0.7f); // Условие для активации спринта, если движение почти совпадает с направлением взгляда
+
+	if (IsRunningForward && AxisX > 0.5f) { // Убедимся, что игрок активно двигается вперед
+		ChangeMovementState(EMovementState::SprintRun_State);
 	}
-	else
-	{
-
-		APlayerController* myController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		if (myController)
-		{
-			FHitResult ResultHit;
-			myController->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery6, false, ResultHit);
-
-			float FindRotaterResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
-			SetActorRotation(FQuat(FRotator(0.0f, FindRotaterResultYaw, 0.0f)));
-		}
+	else {
+		ChangeMovementState(EMovementState::Run_State); // Или возвращаемся в обычный бег
 	}
 }
 
